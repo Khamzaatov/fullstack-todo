@@ -76,7 +76,7 @@ export const editingTodos = createAsyncThunk('todos/editingTodos', async (data, 
     }
 })
 
-export const deleteTodos = createAsyncThunk('todos/deleteTodos', async (id, thunkAPI) => {
+export const deleteTodos = createAsyncThunk('todos/deleteTodos', async ({ id, completed }, thunkAPI) => {
     try {
         const response = await fetch(`http://localhost:4000/todo/${id}`, {
             method : 'DELETE'
@@ -86,9 +86,27 @@ export const deleteTodos = createAsyncThunk('todos/deleteTodos', async (id, thun
             throw new Error('Упс... Временно не могу удалять задачи!')
         }
 
+        console.log(id, completed)
+
         return id
     } catch (error) {
         return thunkAPI.rejectWithValue(error.message)
+    }
+})
+
+export const deleteAllTodos = createAsyncThunk('todos/deleteAllTodos', async (_, thunkAPI) => {
+    try {
+        const response = await fetch('http://localhost:4000/delete', {
+            method: 'DELETE'
+        })
+
+        if (!response.ok) {
+            throw new Error('Произошла какая-то ошибка...')
+        }
+
+        return 'Всё чётко!'
+    } catch (error) {
+        thunkAPI.rejectWithValue(error.message)
     }
 })
 
@@ -125,6 +143,9 @@ const todoSlice = createSlice({
             state.todo = state.todo.map((item) => {
                 if (item._id === action.payload) {
                     item.completed = !item.completed
+                    if (item.completed) {
+                        item.updatedAt = new Date()
+                    }
                 }
                 return item
             })
@@ -134,7 +155,6 @@ const todoSlice = createSlice({
             state.error = action.payload
         })
         .addCase(editingTodos.fulfilled, (state, action) => {
-            console.log(action.payload)
             state.todo = state.todo.map((item) => {
                 if (item._id === action.payload.id) {
                     item.editing = !item.editing
@@ -152,6 +172,12 @@ const todoSlice = createSlice({
             state.error = null
         })
         .addCase(deleteTodos.rejected, (state, action) => {
+            state.error = action.payload
+        })
+        .addCase(deleteAllTodos.fulfilled, (state) => {
+            state.todo = []
+        })
+        .addCase(deleteAllTodos.rejected, (state, action) => {
             state.error = action.payload
         })
     }

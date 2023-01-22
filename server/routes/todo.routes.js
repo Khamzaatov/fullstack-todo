@@ -7,6 +7,7 @@ router.post('/todo', todoControllers.todoCreate)
 router.patch('/todo/:id', todoControllers.todoUpdate)
 router.patch('/todo/edit/:id', todoControllers.todoEditingText)
 router.delete('/todo/:id', todoControllers.todoDelete)
+router.delete('/delete', todoControllers.todoAllRemove)
 
 
 module.exports = router

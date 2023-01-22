@@ -62,4 +62,13 @@ module.exports.todoControllers = {
             response.json(error)
         }
     },
+    todoAllRemove : async (request, response) => {
+        const { id } = request.params
+        try {
+            const todo = await Todo.deleteMany({ id })
+            response.json('Все задачи удалены!')
+        } catch (error) {
+            response.json(error)
+        }
+    }
 }
